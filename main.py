@@ -1,3 +1,5 @@
+
+
 from datetime import datetime
 import flet as ft
 
@@ -9,7 +11,27 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.SYSTEM
     greeting_text = ft.Text('Hello World!')
 
+    History_file = 'history.txt'
+
     greeting_history = {}
+
+    def load_history():
+        try:
+            with open(History_file, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+                for line in lines:
+                    name = line.strip()
+                    if name:
+                        greeting_history.append(name)
+                history_text.value = 'История приветствий:\n' + "\n".join(greeting_history)
+                page.update()
+        except FileNotFoundError:
+            pass
+
+    def save_history():
+        with open(History_file, 'w', encoding='utf-8') as file:
+            for name in greeting_history:
+                file.write(name+'\n')
 
     history_text = ft.Text('History of greetings',size = 'bodyMedium')
 
@@ -48,6 +70,11 @@ def main(page: ft.Page):
         history_text.value = 'History greetings'
         page.update()
 
+    def history_visibility(_):
+        history_text.visible = not history_text.visible
+        toggle_button.text = "Show history" if not history_text.visible else "Hide history"
+        page.update()
+
     def toggle_theme(_):
         if page.theme_mode ==ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
@@ -66,12 +93,15 @@ def main(page: ft.Page):
 
     theme_button = ft.IconButton(icon = ft.icons.BRIGHTNESS_6,tooltip = 'Change theme', on_click=toggle_theme)
 
+    toggle_button = ft.ElevatedButton("Скрыть историю", on_click=history_visibility)
+
    #page.add(greeting_text, name_input, greet_button, history_text, clear_button, theme_button)
 
     page.add(ft.Row([theme_button, clear_button, clear_button2], alignment=ft.MainAxisAlignment.CENTER), 
                                                                 greeting_text,
                                                                 name_input,
                                                                 greet_button,
+                                                                toggle_button,
                                                                ft.Column([history_text], alignment=ft.MainAxisAlignment.CENTER))
 
 ft.app(main)
